@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migration Toolkit Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #1a1a2e;
+      color: #e0e0e0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #233154;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.02em;
+    }
+
+    .badge-version {
+      font-size: 0.72rem;
+      background: #0f3460;
+      color: #60a5fa;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #1e3a8a;
+      font-weight: 600;
+    }
+
+    .current-time {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    /* Cards */
+    .card {
+      background-color: #16213e;
+      border: 1px solid #233154;
+      border-radius: 6px;
+      padding: 18px 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #233154;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #93c5fd;
+    }
+
+    /* Status Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-completed {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid #22c55e;
+    }
+
+    .status-in_progress,
+    .status-in-progress {
+      background: rgba(234, 179, 8, 0.15);
+      color: #facc15;
+      border: 1px solid #eab308;
+    }
+
+    .status-failed {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid #ef4444;
+    }
+
+    .status-not_started,
+    .status-not-started {
+      background: rgba(156, 163, 175, 0.15);
+      color: #9ca3af;
+      border: 1px solid #6b7280;
+    }
+
+    .status-rolled_back,
+    .status-rolled-back {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid #3b82f6;
+    }
+
+    .severity-critical {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid #ef4444;
+    }
+
+    .severity-warning {
+      background: rgba(234, 179, 8, 0.2);
+      color: #facc15;
+      border: 1px solid #eab308;
+    }
+
+    .severity-info {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid #3b82f6;
+    }
+
+    /* Key-Value Grid */
+    .kv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .kv-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kv-label {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .kv-value {
+      font-size: 0.9rem;
+      color: #f1f5f9;
+      word-break: break-all;
+    }
+
+    /* Progress bar */
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: #0f1c3f;
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #3b82f6;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #233154;
+    }
+
+    .data-table th {
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      background: #0f1c3f;
+    }
+
+    .data-table tr:nth-child(even) {
+      background-color: rgba(15, 52, 96, 0.25);
+    }
+
+    .data-table tr:hover {
+      background-color: rgba(15, 52, 96, 0.45);
+    }
+
+    .data-table-vertical th {
+      width: 35%;
+      background: rgba(15, 52, 96, 0.25);
+    }
+
+    .data-table-vertical td {
+      font-weight: 500;
+    }
+
+    /* Samples list */
+    .sample-list {
+      margin-top: 6px;
+      padding-left: 18px;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+    }
+
+    .sample-list li {
+      margin-bottom: 2px;
+    }
+
+    .empty-state {
+      color: #64748b;
+      font-size: 0.82rem;
+      font-style: italic;
+      padding: 8px 0;
+    }
+
+    /* Footer */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #64748b;
+      padding: 12px 0 24px;
+      border-top: 1px solid #233154;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pulse-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 1. HEADER -->
+    <header>
+      <div class="brand">
+        <h1>Migration Toolkit</h1>
+        <span class="badge-version">v1.0</span>
+      </div>
+      <div class="current-time">
+        {{ current_time }}
+      </div>
+    </header>
+
+    <!-- 2. MIGRATION STATUS -->
+    <section class="card">
+      <div class="card-header">
+        <span class="card-title">Migration Status</span>
+        {% set status_val = state.status | default('not_started') | lower %}
+        {% if status_val == 'completed' %}
+          <span class="badge status-completed">Completed</span>
+        {% elif status_val == 'in_progress' %}
+          <span class="badge status-in-progress">In Progress</span>
+        {% elif status_val == 'failed' %}
+          <span class="badge status-failed">Failed</span>
+        {% elif status_val == 'rolled_back' %}
+          <span class="badge status-rolled-back">Rolled Back</span>
+        {% else %}
+          <span class="badge status-not-started">Not Started</span>
+        {% endif %}
+      </div>
+
+      <div class="kv-grid">
+        <div class="kv-item">
+          <span class="kv-label">Last Checkpoint</span>
+          <span class="kv-value">
+            {{ state.last_checkpoint | default(0) }} / {{ state.total_records | default(0) }}
+            {% if state.total_records and state.total_records > 0 %}
+              {% set pct = (state.last_checkpoint | default(0) / state.total_records * 100) | round(1) %}
+              <span style="color: #94a3b8; font-size: 0.8rem;">({{ pct }}%)</span>
+              <div class="progress-track">
+                <div class="progress-fill" style="width: {{ pct }}%;"></div>
+              </div>
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="kv-item">
+          <span class="kv-label">Batch ID</span>
+          <span class="kv-value">{{ state.batch_id or '—' }}</span>
+        </div>
+
+        <div class="kv-item">
+          <span class="kv-label">Started At</span>
+          <span class="kv-value">{{ state.started_at or '—' }}</span>
+        </div>
+
+        <div class="kv-item">
+          <span class="kv-label">Updated At</span>
+          <span class="kv-value">{{ state.updated_at or '—' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. METRICS SUMMARY (only shown if metrics data exists) -->
+    {% if metrics %}
+    <section class="card">
+      <div class="card-header">
+        <span class="card-title">Metrics Summary</span>
+        {% if metrics.generated_at %}
+          <span style="font-size: 0.72rem; color: #94a3b8;">Generated: {{ metrics.generated_at }}</span>
+        {% endif %}
+      </div>
+
+      <div class="table-container">
+        <table class="data-table data-table-vertical">
+          <tbody>
+            <tr>
+              <th>Total Records</th>
+              <td>{{ metrics.total_records if metrics.total_records is defined else '—' }}</td>
+            </tr>
+            <tr>
+              <th>Success Count</th>
+              <td style="color: #4ade80;">{{ metrics.success_count if metrics.success_count is defined else '—' }}</td>
+            </tr>
+            <tr>
+              <th>Failure Count</th>
+              <td style="color: {% if metrics.failure_count and metrics.failure_count > 0 %}#f87171{% else %}#e0e0e0{% endif %};">
+                {{ metrics.failure_count if metrics.failure_count is defined else '—' }}
+              </td>
+            </tr>
+            <tr>
+              <th>Success Rate</th>
+              <td>
+                {% if metrics.success_rate is defined and metrics.success_rate is not none %}
+                  {% if metrics.success_rate <= 1.0 and metrics.success_rate >= 0 %}
+                    {{ "%.2f"|format(metrics.success_rate * 100) }}%
+                  {% else %}
+                    {{ "%.2f"|format(metrics.success_rate) }}%
+                  {% endif %}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th>Avg Time / Record</th>
+              <td>
+                {% if metrics.avg_time_per_record is defined and metrics.avg_time_per_record is not none %}
+                  {% if metrics.avg_time_per_record is number %}
+                    {{ "%.4f"|format(metrics.avg_time_per_record) }}s
+                  {% else %}
+                    {{ metrics.avg_time_per_record }}s
+                  {% endif %}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th>Total Time</th>
+              <td>
+                {% if metrics.total_time_seconds is defined and metrics.total_time_seconds is not none %}
+                  {% if metrics.total_time_seconds is number %}
+                    {{ "%.2f"|format(metrics.total_time_seconds) }}s
+                  {% else %}
+                    {{ metrics.total_time_seconds }}s
+                  {% endif %}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- 4. TRIAGE SUMMARY (only shown if triage data exists) -->
+    {% if triage %}
+    <section class="card">
+      <div class="card-header">
+        <span class="card-title">Triage Summary</span>
+        <span style="font-size: 0.75rem; color: #94a3b8;">Total Issues: <strong style="color: #f87171;">{{ triage.total_issues | default(0) }}</strong></span>
+      </div>
+
+      {% if triage.categories and triage.categories | length > 0 %}
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Severity</th>
+              <th>Count</th>
+              <th>First Seen</th>
+              <th>Last Seen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cat in triage.categories %}
+            <tr>
+              <td>
+                <div>{{ cat.pattern | default('Unknown') }}</div>
+                {% if cat.samples and cat.samples | length > 0 %}
+                  <ul class="sample-list">
+                    {% for sample in cat.samples[:2] %}
+                      <li>{{ sample }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </td>
+              <td>
+                {% set sev = cat.severity | default('info') | lower %}
+                {% if sev == 'critical' %}
+                  <span class="badge severity-critical">Critical</span>
+                {% elif sev == 'warning' %}
+                  <span class="badge severity-warning">Warning</span>
+                {% else %}
+                  <span class="badge severity-info">{{ cat.severity | default('Info') }}</span>
+                {% endif %}
+              </td>
+              <td>{{ cat.count | default(0) }}</td>
+              <td style="color: #94a3b8;">{{ cat.first_seen | default('—') }}</td>
+              <td style="color: #94a3b8;">{{ cat.last_seen | default('—') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="empty-state">No triage categories reported</p>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    <!-- 5. HISTORICAL RUNS -->
+    <section class="card">
+      <div class="card-header">
+        <span class="card-title">Historical Runs</span>
+      </div>
+
+      {% if history and history | length > 0 %}
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Report / Date</th>
+              <th>Total Records</th>
+              <th>Success Rate</th>
+              <th>Success / Fail</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in history %}
+            <tr>
+              <td>
+                <div>{{ item.generated_at or item.filename }}</div>
+                {% if item.generated_at and item.filename %}
+                  <div style="font-size: 0.72rem; color: #64748b;">{{ item.filename }}</div>
+                {% endif %}
+              </td>
+              <td>{{ item.total_records if item.total_records is defined else '—' }}</td>
+              <td>
+                {% if item.success_rate is defined and item.success_rate is not none %}
+                  {% if item.success_rate <= 1.0 and item.success_rate >= 0 %}
+                    {{ "%.2f"|format(item.success_rate * 100) }}%
+                  {% else %}
+                    {{ "%.2f"|format(item.success_rate) }}%
+                  {% endif %}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>
+                <span style="color: #4ade80;">{{ item.success_count | default(0) }}</span> /
+                <span style="color: {% if item.failure_count and item.failure_count > 0 %}#f87171{% else %}#94a3b8{% endif %};">{{ item.failure_count | default(0) }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="empty-state">No historical reports found</p>
+      {% endif %}
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="live-indicator">
+        <span class="pulse-dot"></span>
+        <span>Auto-refreshes every 30s</span>
+      </div>
+      <div>Migration Toolkit • Ops Dashboard</div>
+    </footer>
+  </div>
+
+  <script>
+    setTimeout(() => {
+      location.reload();
+    }, 30000);
+  </script>
+</body>
+</html>

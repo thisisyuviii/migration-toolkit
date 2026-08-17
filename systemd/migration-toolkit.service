@@ -1,0 +1,25 @@
+[Unit]
+Description=Migration Toolkit - Infrastructure Migration Service
+After=network.target
+Documentation=https://github.com/user/migration-toolkit
+
+[Service]
+Type=oneshot
+User=migration
+Group=migration
+WorkingDirectory=/opt/migration-toolkit
+ExecStart=/usr/bin/bash /opt/migration-toolkit/scripts/migrate.sh
+Environment=PYTHONPATH=/opt/migration-toolkit
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=migration-toolkit
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/migration-toolkit/data /opt/migration-toolkit/logs /opt/migration-toolkit/reports
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

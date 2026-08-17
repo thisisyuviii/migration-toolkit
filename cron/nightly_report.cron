@@ -1,0 +1,4 @@
+# Migration Toolkit - Nightly metrics report
+# Install: crontab -l | cat - nightly_report.cron | crontab -
+# Remove: crontab -l | grep -v migration_toolkit | crontab -
+0 2 * * * cd /opt/migration-toolkit && /usr/bin/python3 -m migration_toolkit.metrics >> /var/log/migration-toolkit/cron.log 2>&1
